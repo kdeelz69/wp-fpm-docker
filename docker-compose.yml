@@ -73,6 +73,10 @@ services:
             --dbhost="$$WORDPRESS_DB_HOST" \
             --skip-check;
         fi;
+        wp config set DB_NAME "$$WORDPRESS_DB_NAME" --path=/var/www/html;
+        wp config set DB_USER "$$WORDPRESS_DB_USER" --path=/var/www/html;
+        wp config set DB_PASSWORD "$$WORDPRESS_DB_PASSWORD" --path=/var/www/html;
+        wp config set DB_HOST "$$WORDPRESS_DB_HOST" --path=/var/www/html;
         attempts=0;
         until wp db check --path=/var/www/html >/dev/null 2>&1; do
           attempts=$$((attempts + 1));
