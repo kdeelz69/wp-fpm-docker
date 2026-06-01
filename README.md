@@ -153,7 +153,7 @@ Visit `https://your-domain` after setting env values.
    - `WORDPRESS_VERSION=6.9.4`
    - `PHP_VERSION=8.3`
    - `WORDPRESS_URL=https://yourdomain.com`
-   - `WORDPRESS_SITE_TITLE=Your Site Name`
+   - `WORDPRESS_SITE_TITLE="Your Site Name"`
    - `WORDPRESS_ADMIN_USER=your_admin_user`
    - `WORDPRESS_ADMIN_PASSWORD=your_strong_admin_password`
    - `WORDPRESS_ADMIN_EMAIL=you@domain.com`
