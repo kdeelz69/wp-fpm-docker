@@ -10,6 +10,11 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
     volumes:
       - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "healthcheck.sh --connect --innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
     networks:
       - wp_network
 
@@ -33,8 +38,10 @@ services:
     image: wordpress:cli-php${PHP_VERSION}
     restart: "no"
     depends_on:
-      - mariadb
-      - wordpress
+      mariadb:
+        condition: service_healthy
+      wordpress:
+        condition: service_started
     environment:
       WORDPRESS_DB_HOST: mariadb:3306
       WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
@@ -78,11 +85,11 @@ services:
         wp config set DB_PASSWORD "$$WORDPRESS_DB_PASSWORD" --path=/var/www/html;
         wp config set DB_HOST "$$WORDPRESS_DB_HOST" --path=/var/www/html;
         attempts=0;
-        until wp db check --path=/var/www/html >/dev/null 2>&1; do
+        until php -r '$$h=getenv("WORDPRESS_DB_HOST"); $$port=3306; if (strpos($$h, ":") !== false) { [$$h, $$port] = explode(":", $$h, 2); $$port=(int) $$port; } $$n=getenv("WORDPRESS_DB_NAME"); $$u=getenv("WORDPRESS_DB_USER"); $$p=getenv("WORDPRESS_DB_PASSWORD"); $$m=@new mysqli($$h, $$u, $$p, $$n, $$port); if ($$m->connect_errno) { fwrite(STDERR, $$m->connect_error . PHP_EOL); exit(1); }' >/dev/null 2>&1; do
           attempts=$$((attempts + 1));
           if [ "$$attempts" -ge 20 ]; then
-            echo "Database connection failed. Last WP-CLI error:";
-            wp db check --path=/var/www/html;
+            echo "Database connection failed. Last PHP mysqli error:";
+            php -r '$$h=getenv("WORDPRESS_DB_HOST"); $$port=3306; if (strpos($$h, ":") !== false) { [$$h, $$port] = explode(":", $$h, 2); $$port=(int) $$port; } $$n=getenv("WORDPRESS_DB_NAME"); $$u=getenv("WORDPRESS_DB_USER"); $$p=getenv("WORDPRESS_DB_PASSWORD"); $$m=@new mysqli($$h, $$u, $$p, $$n, $$port); if ($$m->connect_errno) { fwrite(STDERR, $$m->connect_error . PHP_EOL); exit(1); }';
             exit 1;
           fi;
           echo "Waiting for database...";
