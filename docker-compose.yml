@@ -36,6 +36,10 @@ services:
       - mariadb
       - wordpress
     environment:
+      WORDPRESS_DB_HOST: mariadb:3306
+      WORDPRESS_DB_NAME: ${WORDPRESS_DB_NAME}
+      WORDPRESS_DB_USER: ${WORDPRESS_DB_USER}
+      WORDPRESS_DB_PASSWORD: ${WORDPRESS_DB_PASSWORD}
       WORDPRESS_URL: ${WORDPRESS_URL}
       WORDPRESS_SITE_TITLE: ${WORDPRESS_SITE_TITLE}
       WORDPRESS_ADMIN_USER: ${WORDPRESS_ADMIN_USER}
@@ -47,10 +51,19 @@ services:
       - -c
       - |
         set -eu;
-        until [ -f /var/www/html/wp-config.php ]; do
+        until [ -f /var/www/html/wp-load.php ] && [ -d /var/www/html/wp-includes ]; do
           echo "Waiting for WordPress files...";
           sleep 3;
         done;
+        if [ ! -f /var/www/html/wp-config.php ]; then
+          wp config create \
+            --path=/var/www/html \
+            --dbname="$$WORDPRESS_DB_NAME" \
+            --dbuser="$$WORDPRESS_DB_USER" \
+            --dbpass="$$WORDPRESS_DB_PASSWORD" \
+            --dbhost="$$WORDPRESS_DB_HOST" \
+            --skip-check;
+        fi;
         until wp db check --path=/var/www/html >/dev/null 2>&1; do
           echo "Waiting for database...";
           sleep 3;
