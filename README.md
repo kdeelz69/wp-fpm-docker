@@ -183,6 +183,30 @@ Visit `https://your-domain` after setting env values.
 
 ---
 
+## Database restore with HeidiSQL
+
+MariaDB is exposed on the host loopback address by default:
+
+```env
+MYSQL_BIND_ADDRESS=127.0.0.1
+MYSQL_PORT=3306
+```
+
+Use HeidiSQL with an SSH tunnel to the server, then connect to:
+
+```text
+Host: 127.0.0.1
+Port: 3306
+User: value of MYSQL_USER
+Password: value of MYSQL_PASSWORD
+Database: value of MYSQL_DATABASE
+```
+
+Avoid setting `MYSQL_BIND_ADDRESS=0.0.0.0` on a public server unless the port is
+strictly firewalled to your IP.
+
+---
+
 ## Persistence
 
 - MariaDB data is stored in the named volume `db_data`
