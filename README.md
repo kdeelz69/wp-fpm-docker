@@ -51,6 +51,12 @@ Set at least:
 - `WORDPRESS_VERSION` (example: `6.9.4`)
 - `PHP_VERSION` (example: `8.3`)
 - database and WordPress DB credentials
+- WordPress install credentials:
+  - `WORDPRESS_URL`
+  - `WORDPRESS_SITE_TITLE`
+  - `WORDPRESS_ADMIN_USER`
+  - `WORDPRESS_ADMIN_PASSWORD`
+  - `WORDPRESS_ADMIN_EMAIL`
 
 ---
 
@@ -103,6 +109,10 @@ From the project root:
 docker compose up -d
 ```
 
+On first startup, the `wpcli` service automatically installs WordPress using
+the admin details from `.env`. If WordPress is already installed, it exits
+without changing the site.
+
 One-command HTTPS bootstrap:
 
 ```bash
@@ -142,6 +152,11 @@ Visit `https://your-domain` after setting env values.
    - `LETSENCRYPT_EMAIL=you@domain.com`
    - `WORDPRESS_VERSION=6.9.4`
    - `PHP_VERSION=8.3`
+   - `WORDPRESS_URL=https://yourdomain.com`
+   - `WORDPRESS_SITE_TITLE=Your Site Name`
+   - `WORDPRESS_ADMIN_USER=your_admin_user`
+   - `WORDPRESS_ADMIN_PASSWORD=your_strong_admin_password`
+   - `WORDPRESS_ADMIN_EMAIL=you@domain.com`
    - DB passwords/users
 5. Point DNS `A` records (`@` and `www`) to server public IP.
 6. Open inbound ports `80` and `443` in cloud firewall/security group.
@@ -161,6 +176,8 @@ Visit `https://your-domain` after setting env values.
 
 - `html/` is mounted into both the `wordpress` and `nginx` containers.
 - The official WordPress image initializes site files into `html/` when the volume is empty.
+- The `wpcli` service waits for WordPress files and MariaDB, then runs a one-time
+  `wp core install` if the site has not already been installed.
 - nginx uses `nginx.conf.template` and Docker's env substitution at container startup.
 - `certbot/run-certbot.sh` reads `.env` and requests certs for both `DOMAIN` and `WWW_DOMAIN`.
 
