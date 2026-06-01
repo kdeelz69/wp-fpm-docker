@@ -51,6 +51,15 @@ services:
       - -c
       - |
         set -eu;
+        : "$$WORDPRESS_DB_HOST";
+        : "$$WORDPRESS_DB_NAME";
+        : "$$WORDPRESS_DB_USER";
+        : "$$WORDPRESS_DB_PASSWORD";
+        : "$$WORDPRESS_URL";
+        : "$$WORDPRESS_SITE_TITLE";
+        : "$$WORDPRESS_ADMIN_USER";
+        : "$$WORDPRESS_ADMIN_PASSWORD";
+        : "$$WORDPRESS_ADMIN_EMAIL";
         until [ -f /var/www/html/wp-load.php ] && [ -d /var/www/html/wp-includes ]; do
           echo "Waiting for WordPress files...";
           sleep 3;
@@ -64,7 +73,14 @@ services:
             --dbhost="$$WORDPRESS_DB_HOST" \
             --skip-check;
         fi;
+        attempts=0;
         until wp db check --path=/var/www/html >/dev/null 2>&1; do
+          attempts=$$((attempts + 1));
+          if [ "$$attempts" -ge 20 ]; then
+            echo "Database connection failed. Last WP-CLI error:";
+            wp db check --path=/var/www/html;
+            exit 1;
+          fi;
           echo "Waiting for database...";
           sleep 3;
         done;
