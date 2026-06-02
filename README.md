@@ -1,5 +1,28 @@
 # Docker WordPress Starter
 
+<p align="center">
+  <a href="https://github.com/kdeelz69/wp-fpm-docker">
+    <img alt="Repo views" src="https://komarev.com/ghpvc/?username=kdeelz69-wp-fpm-docker&label=repo%20views&color=0e75b6&style=for-the-badge">
+  </a>
+  <a href="https://github.com/kdeelz69/wp-fpm-docker/stargazers">
+    <img alt="GitHub stars" src="https://img.shields.io/github/stars/kdeelz69/wp-fpm-docker?style=for-the-badge&logo=github&label=stars">
+  </a>
+  <a href="https://github.com/kdeelz69/wp-fpm-docker/forks">
+    <img alt="GitHub forks" src="https://img.shields.io/github/forks/kdeelz69/wp-fpm-docker?style=for-the-badge&logo=github&label=forks">
+  </a>
+  <a href="https://github.com/kdeelz69/wp-fpm-docker/watchers">
+    <img alt="GitHub watchers" src="https://img.shields.io/github/watchers/kdeelz69/wp-fpm-docker?style=for-the-badge&logo=github&label=watchers">
+  </a>
+  <a href="https://github.com/kdeelz69/wp-fpm-docker/commits/main">
+    <img alt="Last commit" src="https://img.shields.io/github/last-commit/kdeelz69/wp-fpm-docker?style=for-the-badge&logo=git&label=last%20commit">
+  </a>
+  <a href="https://github.com/kdeelz69/wp-fpm-docker/archive/refs/heads/main.zip">
+    <img alt="Git clone" src="https://img.shields.io/badge/git%20clone-ready-2ea44f?style=for-the-badge&logo=git">
+  </a>
+  <img alt="Repo size" src="https://img.shields.io/github/repo-size/kdeelz69/wp-fpm-docker?style=for-the-badge&label=repo%20size">
+  <img alt="License" src="https://img.shields.io/github/license/kdeelz69/wp-fpm-docker?style=for-the-badge&label=license">
+</p>
+
 A reusable Docker Compose starter for WordPress with nginx and Let's Encrypt.
 
 This repository contains a minimal public-ready stack for running WordPress in Docker:
