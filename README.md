@@ -23,7 +23,7 @@
   <img alt="License" src="https://img.shields.io/github/license/kdeelz69/wp-fpm-docker?style=for-the-badge&label=license">
 </p>
 
-A reusable Docker Compose starter for WordPress with nginx and Let's Encrypt.
+A reusable Docker Compose starter for WordPress with nginx and TLS support.
 
 This repository contains a minimal public-ready stack for running WordPress in Docker:
 
@@ -31,6 +31,7 @@ This repository contains a minimal public-ready stack for running WordPress in D
 - `wordpress` PHP-FPM application container
 - `nginx` web server with HTTPS support
 - `certbot` for obtaining and renewing Let's Encrypt certificates
+- support for a purchased certificate mounted from `certificates/`
 
 > The project is intentionally configured as a reusable starter. It does not ship WordPress core content in `html/` and it uses placeholder domain names that must be updated before deployment.
 
@@ -43,6 +44,7 @@ This repository contains a minimal public-ready stack for running WordPress in D
 - `certbot/run-certbot.sh` - certificate issuance script
 - `.env.example` - required environment variables
 - `certbot/conf/` - certificate storage directory (runtime data)
+- `certificates/` - purchased certificate files (ignored by Git)
 - `html/` - WordPress site volume mount point
 - `php/uploads.ini` - custom PHP upload settings
 - `.gitignore` - runtime artifacts excluded from Git
@@ -161,6 +163,56 @@ docker compose restart nginx
 ```
 
 Visit `https://your-domain` after setting env values.
+
+---
+
+## Install a purchased TLS certificate
+
+The certificate must cover both values in `.env` if both hostnames are used:
+
+- `DOMAIN` (for example, `example.com`)
+- `WWW_DOMAIN` (for example, `www.example.com`)
+
+Place these files on the Docker host:
+
+```text
+certificates/fullchain.pem
+certificates/privkey.pem
+```
+
+`fullchain.pem` must contain the site certificate first, followed by the
+intermediate CA certificate(s). If your provider supplied separate files:
+
+```bash
+cat your-domain.crt intermediate-ca-bundle.crt > certificates/fullchain.pem
+cp your-private-key.key certificates/privkey.pem
+chmod 600 certificates/privkey.pem
+```
+
+The private key must be the key used to create the certificate signing request
+(CSR), must not be password protected, and must never be committed to Git.
+
+Start or recreate nginx, then validate it:
+
+```bash
+docker compose up -d --force-recreate nginx
+docker compose exec nginx nginx -t
+docker compose logs --tail=100 nginx
+```
+
+Nginx prefers the purchased certificate when both mounted files exist. If they
+do not exist, it falls back to the existing Let's Encrypt certificate. You can
+use different container paths by setting `TLS_CERTIFICATE_PATH` and
+`TLS_CERTIFICATE_KEY_PATH` in `.env`.
+
+Check the certificate served by the site:
+
+```bash
+openssl s_client -connect example.com:443 -servername example.com </dev/null
+```
+
+Purchased certificates are not renewed by Certbot. Replace the files before
+expiry and recreate or restart nginx.
 
 ---
 

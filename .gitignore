@@ -14,6 +14,10 @@ certbot/conf/keys/
 certbot/conf/*.pem
 certbot/conf/*.json
 
+# Purchased TLS certificate and private key
+certificates/*
+!certificates/README.md
+
 # Editor and OS files
 .DS_Store
 Thumbs.db

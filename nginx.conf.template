@@ -75,8 +75,8 @@ server {
     listen 443 ssl http2;
     server_name ${DOMAIN};
 
-    ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+    ssl_certificate ${TLS_CERTIFICATE_PATH};
+    ssl_certificate_key ${TLS_CERTIFICATE_KEY_PATH};
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_prefer_server_ciphers on;
     ssl_ciphers HIGH:!aNULL:!MD5;
@@ -92,8 +92,8 @@ server {
     listen 443 ssl http2;
     server_name ${WWW_DOMAIN};
 
-    ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+    ssl_certificate ${TLS_CERTIFICATE_PATH};
+    ssl_certificate_key ${TLS_CERTIFICATE_KEY_PATH};
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_prefer_server_ciphers on;
     ssl_ciphers HIGH:!aNULL:!MD5;
