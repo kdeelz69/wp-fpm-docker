@@ -64,6 +64,7 @@ Start the stack:
 
 ```bash
 docker compose up -d
+docker compose up -d --force-recreate nginx
 ```
 
 Nginx automatically uses the purchased certificate when both configured files
@@ -76,10 +77,11 @@ docker compose exec nginx nginx -t
 docker compose logs --tail=100 nginx
 ```
 
-When replacing an expired certificate, replace the files and restart Nginx:
+When installing or replacing a purchased certificate, recreate Nginx so it
+regenerates its configuration and mounts the current certificate files:
 
 ```bash
-docker compose restart nginx
+docker compose up -d --force-recreate nginx
 ```
 
 ## Let's Encrypt
