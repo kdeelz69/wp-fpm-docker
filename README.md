@@ -1,306 +1,150 @@
-# Docker WordPress Starter
+# WordPress Docker Stack
 
-<p align="center">
-  <a href="https://github.com/kdeelz69/wp-fpm-docker">
-    <img alt="Repo views" src="https://komarev.com/ghpvc/?username=kdeelz69-wp-fpm-docker&label=repo%20views&color=0e75b6&style=for-the-badge">
-  </a>
-  <a href="https://github.com/kdeelz69/wp-fpm-docker/stargazers">
-    <img alt="GitHub stars" src="https://img.shields.io/github/stars/kdeelz69/wp-fpm-docker?style=for-the-badge&logo=github&label=stars">
-  </a>
-  <a href="https://github.com/kdeelz69/wp-fpm-docker/forks">
-    <img alt="GitHub forks" src="https://img.shields.io/github/forks/kdeelz69/wp-fpm-docker?style=for-the-badge&logo=github&label=forks">
-  </a>
-  <a href="https://github.com/kdeelz69/wp-fpm-docker/watchers">
-    <img alt="GitHub watchers" src="https://img.shields.io/github/watchers/kdeelz69/wp-fpm-docker?style=for-the-badge&logo=github&label=watchers">
-  </a>
-  <a href="https://github.com/kdeelz69/wp-fpm-docker/commits/main">
-    <img alt="Last commit" src="https://img.shields.io/github/last-commit/kdeelz69/wp-fpm-docker?style=for-the-badge&logo=git&label=last%20commit">
-  </a>
-  <a href="https://github.com/kdeelz69/wp-fpm-docker/archive/refs/heads/main.zip">
-    <img alt="Git clone" src="https://img.shields.io/badge/git%20clone-ready-2ea44f?style=for-the-badge&logo=git">
-  </a>
-  <img alt="Repo size" src="https://img.shields.io/github/repo-size/kdeelz69/wp-fpm-docker?style=for-the-badge&label=repo%20size">
-  <img alt="License" src="https://img.shields.io/github/license/kdeelz69/wp-fpm-docker?style=for-the-badge&label=license">
-</p>
+Docker Compose setup for:
 
-A reusable Docker Compose starter for WordPress with nginx and TLS support.
+- WordPress with PHP-FPM
+- MariaDB
+- Nginx
+- Purchased TLS certificates or Let's Encrypt with Certbot
 
-This repository contains a minimal public-ready stack for running WordPress in Docker:
+## Requirements
 
-- `mariadb` for the database
-- `wordpress` PHP-FPM application container
-- `nginx` web server with HTTPS support
-- `certbot` for obtaining and renewing Let's Encrypt certificates
-- support for a purchased certificate mounted from `certificates/`
+- Docker Engine and Docker Compose v2
+- Domain DNS records pointing to the server
+- Ports `80` and `443` open
 
-> The project is intentionally configured as a reusable starter. It does not ship WordPress core content in `html/` and it uses placeholder domain names that must be updated before deployment.
+## Configure
 
----
-
-## Repository structure
-
-- `docker-compose.yml` - Docker Compose stack definition
-- `nginx.conf.template` - nginx template rendered from env variables
-- `certbot/run-certbot.sh` - certificate issuance script
-- `.env.example` - required environment variables
-- `certbot/conf/` - certificate storage directory (runtime data)
-- `certificates/` - purchased certificate files (ignored by Git)
-- `html/` - WordPress site volume mount point
-- `php/uploads.ini` - custom PHP upload settings
-- `.gitignore` - runtime artifacts excluded from Git
-
----
-
-## Prerequisites
-
-- Docker Engine
-- Docker Compose v2 (`docker compose`)
-- DNS records for your domain pointing to the host
-- Ports `80` and `443` open on the host
-
----
-
-## Before you start
-
-Create your env file and update values:
+Create the local environment file:
 
 ```bash
 cp .env.example .env
 ```
 
-Set at least:
+Update `.env` with:
 
-- `DOMAIN` (example: `example.com`)
-- `WWW_DOMAIN` (example: `www.example.com`)
-- `LETSENCRYPT_EMAIL`
-- `WORDPRESS_VERSION` (example: `6.9.4`)
-- `PHP_VERSION` (example: `8.3`)
-- database and WordPress DB credentials
-- WordPress install credentials:
-  - `WORDPRESS_URL`
-  - `WORDPRESS_SITE_TITLE`
-  - `WORDPRESS_ADMIN_USER`
-  - `WORDPRESS_ADMIN_PASSWORD`
-  - `WORDPRESS_ADMIN_EMAIL`
+- `DOMAIN` and `WWW_DOMAIN`
+- WordPress site and administrator details
+- MariaDB and WordPress database credentials
+- `LETSENCRYPT_EMAIL` only when using Let's Encrypt
 
----
+Use hostnames only for `DOMAIN` and `WWW_DOMAIN`, without `https://`.
 
-## WordPress and PHP version selection
+## Purchased Certificate
 
-This project now builds the WordPress image tag from:
+The certificate must be valid for both `DOMAIN` and `WWW_DOMAIN` when both
+hostnames are configured.
 
-- `WORDPRESS_VERSION`
-- `PHP_VERSION`
-
-Compose pattern used:
-
-```text
-wordpress:${WORDPRESS_VERSION}-php${PHP_VERSION}-fpm
-```
-
-Recommended defaults:
-
-- `WORDPRESS_VERSION=6.9.4`
-- `PHP_VERSION=8.3`
-
-Practical compatibility guide (for `PHP 7.4` to `8.3`):
-
-| PHP version | Use with WordPress | Recommendation |
-|---|---|---|
-| 8.3 | 6.8+ (fully compatible in current handbook) | Best choice |
-| 8.2 | 6.5+ | Safe choice |
-| 8.1 | 6.4+ | Safe choice |
-| 8.0 | 6.4+ | Acceptable, but older |
-| 7.4 | 6.4+ still supports it | Legacy only, upgrade planned |
-
-Important notes:
-
-- WordPress core support and plugin/theme support are different; newer PHP can still break old plugins.
-- `php7.4` Docker tags are old/unmaintained compared with `8.x`; use only for legacy migrations.
-- If a specific tag combination does not exist on Docker Hub, `docker compose up` will fail to pull.
-
-References:
-
-- WordPress PHP compatibility matrix: https://make.wordpress.org/core/handbook/references/php-compatibility-and-wordpress-versions/
-- WordPress Docker tags: https://hub.docker.com/_/wordpress/tags
-
----
-
-## Quick start
-
-From the project root:
-
-```bash
-docker compose up -d
-```
-
-On first startup, the `wpcli` service automatically installs WordPress using
-the admin details from `.env`. If WordPress is already installed, it exits
-without changing the site.
-
-One-command HTTPS bootstrap:
-
-```bash
-sh bootstrap-https.sh
-```
-
-Issue or renew TLS certificates:
-
-```bash
-sh certbot/run-certbot.sh
-```
-
-You can override email at runtime:
-
-```bash
-sh certbot/run-certbot.sh you@example.com
-```
-
-Restart nginx after certificates are created or renewed:
-
-```bash
-docker compose restart nginx
-```
-
-Visit `https://your-domain` after setting env values.
-
----
-
-## Install a purchased TLS certificate
-
-The certificate must cover both values in `.env` if both hostnames are used:
-
-- `DOMAIN` (for example, `example.com`)
-- `WWW_DOMAIN` (for example, `www.example.com`)
-
-Place these files on the Docker host:
+By default, place the files here:
 
 ```text
 certificates/fullchain.pem
 certificates/privkey.pem
 ```
 
-`fullchain.pem` must contain the site certificate first, followed by the
-intermediate CA certificate(s). If your provider supplied separate files:
+- `fullchain.pem` contains the domain certificate followed by any intermediate
+  CA certificates.
+- `privkey.pem` contains the matching unencrypted private key.
 
-```bash
-cat your-domain.crt intermediate-ca-bundle.crt > certificates/fullchain.pem
-cp your-private-key.key certificates/privkey.pem
-chmod 600 certificates/privkey.pem
+The original filenames and extensions do not matter. If you keep names such as
+`domain.pem` and `domain.key`, update `.env`:
+
+```env
+TLS_CERTIFICATE_PATH=/etc/nginx/certificates/domain.pem
+TLS_CERTIFICATE_KEY_PATH=/etc/nginx/certificates/domain.key
 ```
 
-The private key must be the key used to create the certificate signing request
-(CSR), must not be password protected, and must never be committed to Git.
+The files remain inside the host `certificates/` directory because Docker
+mounts that directory at `/etc/nginx/certificates` inside the Nginx container.
 
-Start or recreate nginx, then validate it:
+Never commit or share the private key. Certificate files in `certificates/`
+are ignored by Git.
+
+Start the stack:
 
 ```bash
-docker compose up -d --force-recreate nginx
+docker compose up -d
+```
+
+Nginx automatically uses the purchased certificate when both configured files
+exist.
+
+Validate the configuration:
+
+```bash
 docker compose exec nginx nginx -t
 docker compose logs --tail=100 nginx
 ```
 
-Nginx prefers the purchased certificate when both mounted files exist. If they
-do not exist, it falls back to the existing Let's Encrypt certificate. You can
-use different container paths by setting `TLS_CERTIFICATE_PATH` and
-`TLS_CERTIFICATE_KEY_PATH` in `.env`.
-
-Check the certificate served by the site:
+When replacing an expired certificate, replace the files and restart Nginx:
 
 ```bash
-openssl s_client -connect example.com:443 -servername example.com </dev/null
+docker compose restart nginx
 ```
 
-Purchased certificates are not renewed by Certbot. Replace the files before
-expiry and recreate or restart nginx.
+## Let's Encrypt
 
----
+Use this option only when you do not have a purchased certificate.
 
-## From-scratch server setup process
+Set `LETSENCRYPT_EMAIL` in `.env`, then run:
 
-1. Install Docker + Compose on server.
-2. Clone repo into server directory (example: `/home/wp-fpm`).
-3. Copy env template: `cp .env.example .env`.
-4. Edit `.env` with real values:
-   - `DOMAIN=yourdomain.com`
-   - `WWW_DOMAIN=www.yourdomain.com`
-   - `LETSENCRYPT_EMAIL=you@domain.com`
-   - `WORDPRESS_VERSION=6.9.4`
-   - `PHP_VERSION=8.3`
-   - `WORDPRESS_URL=https://yourdomain.com`
-   - `WORDPRESS_SITE_TITLE="Your Site Name"`
-   - `WORDPRESS_ADMIN_USER=your_admin_user`
-   - `WORDPRESS_ADMIN_PASSWORD=your_strong_admin_password`
-   - `WORDPRESS_ADMIN_EMAIL=you@domain.com`
-   - DB passwords/users
-5. Point DNS `A` records (`@` and `www`) to server public IP.
-6. Open inbound ports `80` and `443` in cloud firewall/security group.
-7. Start stack: `docker compose up -d`.
-8. Bootstrap HTTPS: `sh bootstrap-https.sh`.
-9. Verify:
-   - `docker compose ps` (all Up)
-   - `docker compose logs --tail=100 nginx`
-   - visit `https://yourdomain.com`
-10. For renewals later:
-    - `sh certbot/run-certbot.sh`
-    - `docker compose restart nginx`
-
----
-
-## How it works
-
-- `html/` is mounted into both the `wordpress` and `nginx` containers.
-- The official WordPress image initializes site files into `html/` when the volume is empty.
-- The `wpcli` service waits for WordPress files and MariaDB, then runs a one-time
-  `wp core install` if the site has not already been installed.
-- nginx uses `nginx.conf.template` and Docker's env substitution at container startup.
-- `certbot/run-certbot.sh` reads `.env` and requests certs for both `DOMAIN` and `WWW_DOMAIN`.
-
----
-
-## Database restore with HeidiSQL
-
-MariaDB is exposed on the host loopback address by default:
-
-```env
-MYSQL_BIND_ADDRESS=127.0.0.1
-MYSQL_PORT=3306
+```bash
+sh bootstrap-https.sh
 ```
 
-Use HeidiSQL with an SSH tunnel to the server, then connect to:
+This command:
 
-```text
-Host: 127.0.0.1
-Port: 3306
-User: value of MYSQL_USER
-Password: value of MYSQL_PASSWORD
-Database: value of MYSQL_DATABASE
+1. Starts the Docker services.
+2. Starts Nginx over HTTP.
+3. Requests a certificate for `DOMAIN` and `WWW_DOMAIN`.
+4. Stores it under `certbot/conf/`.
+5. Restarts Nginx with HTTPS.
+
+Certbot is included in the Compose stack, but `docker compose up -d` alone does
+not request a certificate.
+
+To renew later:
+
+```bash
+sh certbot/run-certbot.sh
+docker compose restart nginx
 ```
 
-Avoid setting `MYSQL_BIND_ADDRESS=0.0.0.0` on a public server unless the port is
-strictly firewalled to your IP.
+Nginx prefers a purchased certificate from `certificates/` over a Let's Encrypt
+certificate.
 
----
+## Initial WordPress Setup
 
-## Persistence
+On the first startup, `wpcli` waits for MariaDB and WordPress, creates
+`wp-config.php` when needed, and installs WordPress using the values from
+`.env`. It does not reinstall an existing site.
 
-- MariaDB data is stored in the named volume `db_data`
-- Certificates are stored in `certbot/conf/`
-- WordPress files are created inside `html/`
+## Useful Commands
 
----
+```bash
+docker compose ps
+docker compose logs --tail=100 nginx
+docker compose logs --tail=100 wordpress
+docker compose exec nginx nginx -t
+docker compose restart nginx
+docker compose down
+```
+
+## Persistent Data
+
+- WordPress files: `html/`
+- MariaDB data: Docker volume `db_data`
+- Purchased certificates: `certificates/`
+- Let's Encrypt certificates: `certbot/conf/`
+
+MariaDB is exposed only on `127.0.0.1` by default. Use an SSH tunnel for remote
+database access rather than exposing port `3306` publicly.
 
 ## Troubleshooting
 
-- `docker compose ps`
-- `docker compose logs nginx`
-- `docker compose logs certbot`
-- verify DNS and port access
-- `docker compose exec nginx nginx -t` to validate generated config
-- if Certbot reports `Connection refused`, confirm nginx is `Up` and host/security-group allows inbound `80/tcp`
-
----
-
-## License
-
-This repository is intentionally generic and ready to adapt to your own project. Choose a license before publishing.
+- Confirm `DOMAIN` and `WWW_DOMAIN` point to the server.
+- Confirm ports `80` and `443` are open.
+- Confirm the certificate and private key match.
+- Confirm the certificate covers both configured hostnames.
+- Run `docker compose exec nginx nginx -t`.
+- Review `docker compose logs --tail=200 nginx`.
